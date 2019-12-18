@@ -40,33 +40,56 @@ public class SampleHandler extends AbstractHandler {
 
 	/**
 	 * Output for the Eclipse Plugin Prompts the user first for a file path, Then
-	 * prompts for a language type Prints results form application.driver
+	 * prompts for a language type using radio buttons, Then prompt the user for the
+	 * percent match for method duplication
+	 * 
+	 * Prints results from application.driver
 	 */
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		String type = null;
+		int percent = 100;
+		String language = null;
+
 		// text window to accept a file path to be ran on the Brumby Code Checker
-		InputDialog dlg = new InputDialog(HandlerUtil.getActiveShellChecked(event), "Enter Path Name",
+		InputDialog dlg = new InputDialog(HandlerUtil.getActiveShellChecked(event), "  Brumby Code Checker",
 				"Enter in File Path to Check", "C:\\Users\\username\\workspace\\TestingDuplicate\\src", null);
 		if (dlg.open() == InputDialog.OK) {
 			// User clicked OK; save entered path
 			String input = dlg.getValue();
 
-			// text window to accept a language type for Brumby Code Checker
-			InputDialog dlg2 = new InputDialog(HandlerUtil.getActiveShellChecked(event), "Enter Language Type",
-					"Enter in a File Language Type (.java .cpp)", ".java", null);
-			
-			if (dlg2.open() == InputDialog.OK) {
-				// User clicked OK; save entered path
-				type = dlg2.getValue();
+			// radio button text window to accept a language type for Brumby Code Checker
+			MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShellChecked(event), "  Brumby Code Checker",
+					null, "Select the Lanuage of your code", MessageDialog.QUESTION,
+					new String[] { "Java", "C++", "Ada" }, 0);
+			// save numeric button position the user clicked on
+			int result = dialog.open();
+
+			// user selected Java radio button
+			if (result == 0) {
+				language = ".java";
+			}
+			// user selected C++ radio button
+			if (result == 1) {
+				language = ".cpp";
+			}
+			// user selected Ada radio button
+			if (result == 2) {
+				language = ".ada";
 			}
 
+			// text window to accept a maximum percent match for the Brumby Code Checker
+			InputDialog dlg3 = new InputDialog(HandlerUtil.getActiveShellChecked(event), "  Brumby Code Checker",
+					"Enter in Percent Match: ", "75", null);
+			if (dlg3.open() == InputDialog.OK) {
+				// User clicked OK; save entered path
+				percent = Integer.parseInt(dlg3.getValue());
+			}
+
+			// call the driver from the Brumby Code Checker java project
 			driver.Application brumby = new driver.Application();
-			String results = brumby.plugin(input, type);
-
+			String output = brumby.plugin(input, language, percent) + "\nCompete File Extract Found At: c:/temp/BCC_Output.txt";
+			
 			// output message
-			MessageDialog.openInformation(HandlerUtil.getActiveShellChecked(event), "Code Duplicates within: " + input,
-					results);
-
+			MessageDialog.openInformation(HandlerUtil.getActiveShellChecked(event), "  Brumby Code Checker Results: ", output);
 		}
 		return null;
 	}
